@@ -1,0 +1,13 @@
+{
+  "name": "niuma-shark-tank",
+  "description": "niuma: your agents at work as sharks in an ASCII tank, for Claude Code",
+  "owner": {
+    "name": "Mopshi"
+  },
+  "plugins": [
+    {
+      "name": "niuma",
+      "source": "./"
+    }
+  ]
+}

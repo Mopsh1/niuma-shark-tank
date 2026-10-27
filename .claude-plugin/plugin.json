@@ -1,0 +1,27 @@
+{
+  "name": "niuma",
+  "version": "1.0.0",
+  "description": "Your agents at work as sharks in an ASCII tank: Claude subagents, Codex and Antigravity runs, each a shark that lights up while it works, with who is doing what listed below",
+  "author": {
+    "name": "Mopshi"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/Mopsh1/niuma-shark-tank",
+  "repository": "https://github.com/Mopsh1/niuma-shark-tank",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "summaryLanguage": {
+      "type": "string",
+      "title": "Task summaries",
+      "description": "Each task's one-line title: written by Haiku in English (en) or Traditional Chinese (zh-TW) when its description is in another language, or off to show the description as given and call no model.",
+      "default": "en",
+      "options": ["en", "zh-TW", "off"]
+    },
+    "tankDensity": {
+      "type": "number",
+      "title": "Tank density (desktop)",
+      "description": "How many of the tank's small-type cells fit in one column of the pane, 1 to 2. Lower it if the right edge of the tank is cut off, raise it if there is a gap.",
+      "default": 1.15
+    }
+  }
+}

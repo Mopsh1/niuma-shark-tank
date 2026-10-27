@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shark Tank Tuner</title>
+<style>
+  :root { --ink: #1d1d1f; --muted: #6e6e73; --line: #e2e2df; --page: #f2f2f0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 13px/1.45 -apple-system, "PingFang TC", "Helvetica Neue", sans-serif; }
+  main { display: flex; gap: 20px; padding: 16px; align-items: flex-start; flex-wrap: wrap; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .card h1 { font-size: 13px; font-weight: 500; margin: 0 0 10px; color: var(--muted); }
+  /* The desktop's small mono type in the pane: 6.55pt across, 16.5pt a line (measured 2026-10-27). */
+  #tank { overflow: hidden; font: 10.9px/16.5px ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace; }
+  #tank .row { height: 16.5px; overflow: hidden; white-space: pre; }
+  .controls { width: 340px; max-width: 100%; }
+  fieldset { border: none; margin: 0 0 14px; padding: 0; }
+  legend { font-weight: 600; margin-bottom: 4px; }
+  .ctl { display: grid; grid-template-columns: 1fr 64px; gap: 0 8px; margin: 6px 0; }
+  .ctl input[type=range] { grid-column: 1 / -1; width: 100%; }
+  .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .paper { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .agents label { display: block; margin: 3px 0; }
+  .buttons { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  button { font: inherit; padding: 5px 12px; border-radius: 8px; border: 1px solid var(--line); background: #fff; cursor: pointer; }
+  button:hover { background: #f6f6f4; }
+  pre { background: #f6f6f4; border-radius: 8px; padding: 8px; font-size: 11px; white-space: pre-wrap; margin: 0; }
+  .note { color: var(--muted); font-size: 12px; margin: 4px 0 10px; }
+</style>
+</head>
+<body>
+<main>
+  <section class="card">
+    <h1>Agents 面板（模擬桌面版）</h1>
+    <div id="tank"></div>
+    <p class="note" id="size"></p>
+  </section>
+  <section class="card controls">
+    <fieldset class="agents">
+      <legend>誰在工作</legend>
+      <label><input type="checkbox" data-agent="codex" checked> Codex（藍・雙髻鯊）</label>
+      <label><input type="checkbox" data-agent="agy"> Antigravity（綠・虎鯊）</label>
+      <label><input type="checkbox" data-agent="claude"> Claude 子代理（橘・鯖鯊）</label>
+      <label><input type="checkbox" data-agent="extra"> 再多一個 Claude 子代理</label>
+    </fieldset>
+    <fieldset id="look"><legend>外觀</legend>
+      <div class="paper"><span>紙色</span><input type="color" id="paper"><code id="paperHex"></code></div>
+    </fieldset>
+    <fieldset id="paneset"><legend>你的面板（只用來模擬，不會寫回）</legend></fieldset>
+    <div class="buttons">
+      <button id="copy">複製參數</button>
+      <button id="reset">恢復預設</button>
+      <button id="reseed">重新放魚</button>
+    </div>
+    <pre id="params"></pre>
+  </section>
+</main>
+<script type="module">
+import { LOOK, framed, newWorld, reconcile, resize, setLook, step } from './tank.js'
+
+// The desktop's tank type, as the mod passes it (register.tsx TANK_TYPE.desktop).
+const DENSITY = 1.15
+const ASPECT = 2.5
+const DEFAULTS = {
+  look: { ...LOOK },
+  pane: { columns: 63, rows: 60 },
+}
+const COLORS = { codex: '#4C9AF5', agy: '#34A877', claude: '#CC7B5C', extra: '#DCA591' }
+const SPECS = [
+  { group: 'look', key: 'activeSize', label: '工作中鯊魚大小', min: 0.3, max: 1.3, step: 0.01 },
+  { group: 'look', key: 'idleSize', label: '閒置鯊魚大小', min: 0.2, max: 1.1, step: 0.01 },
+  { group: 'look', key: 'broad', label: '鯊魚粗細', min: 0.8, max: 1.8, step: 0.01 },
+  { group: 'look', key: 'idleStrength', label: '閒置鯊魚濃度', min: 0.2, max: 1, step: 0.01 },
+  { group: 'look', key: 'tint', label: '各家色調', min: 0, max: 0.6, step: 0.01 },
+  { group: 'look', key: 'shimmer', label: '閃字比例', min: 0, max: 0.4, step: 0.01 },
+  { group: 'look', key: 'dotShare', label: '點陣比例', min: 0, max: 0.5, step: 0.01 },
+  { group: 'look', key: 'dotStrength', label: '點陣濃淡', min: 0, max: 2, step: 0.05 },
+  { group: 'look', key: 'speed', label: '游速', min: 0.3, max: 2, step: 0.05 },
+  { group: 'pane', key: 'columns', label: '面板寬（欄）', min: 40, max: 110, step: 1 },
+  { group: 'pane', key: 'rows', label: '面板可見高度（列）', min: 30, max: 90, step: 1 },
+]
+
+let state = structuredClone(DEFAULTS)
+const agents = { codex: true, agy: false, claude: false, extra: false }
+const EL = { Box: p => p, Text: p => p }
+let world = newWorld()
+world.aspect = ASPECT
+
+const $ = id => document.getElementById(id)
+const fieldsets = { look: $('look'), pane: $('paneset') }
+const inputs = new Map()
+
+for (const spec of SPECS) {
+  const label = document.createElement('label')
+  label.className = 'ctl'
+  label.innerHTML = `<span>${spec.label}</span><span class="val"></span><input type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}">`
+  const input = label.querySelector('input')
+  input.addEventListener('input', () => {
+    state[spec.group][spec.key] = Number(input.value)
+    apply(spec.key === 'dotShare')
+  })
+  inputs.set(spec, input)
+  fieldsets[spec.group].append(label)
+}
+$('paper').addEventListener('input', e => {
+  state.look.paper = e.target.value
+  apply(false)
+})
+for (const box of document.querySelectorAll('[data-agent]')) {
+  box.addEventListener('change', () => { agents[box.dataset.agent] = box.checked })
+}
+
+function sizeOf() {
+  const cols = Math.floor(state.pane.columns * DENSITY) - 1
+  // The tank fills the pane, as it does while no run is listed below it.
+  const rows = state.pane.rows
+  return { cols, rows }
+}
+
+// Pushes the controls' values into the tank; a new dot share lays the dots out again.
+function apply(isRelaid) {
+  setLook(state.look)
+  for (const [spec, input] of inputs) {
+    input.value = state[spec.group][spec.key]
+    input.parentElement.querySelector('.val').textContent = String(state[spec.group][spec.key])
+  }
+  $('paper').value = state.look.paper
+  $('paperHex').textContent = state.look.paper
+  $('tank').style.background = state.look.paper
+  if (isRelaid && world.cols > 0) resize(world, world.cols, world.rows)
+  const params = { look: state.look }
+  window.tunerParams = params
+  $('params').textContent = JSON.stringify(params, null, 2)
+}
+
+function wanted() {
+  let n = 0
+  const shark = (id, kind, name, isActive) =>
+    isActive
+      ? { id, kind, color: COLORS[id], tag: `${(n += 1)} ${name}`, isActive: true }
+      : { id, kind, color: COLORS[id], tag: `${name} idle`, isActive: false }
+  const list = [
+    shark('codex', 'hammer', 'Codex', agents.codex),
+    shark('agy', 'tiger', 'Antigravity', agents.agy),
+    shark('claude', 'mako', agents.claude ? 'Explore' : 'Claude', agents.claude),
+  ]
+  if (agents.extra) list.push(shark('extra', 'mako', 'Plan', true))
+  return list
+}
+
+const escape = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+// A run is a plain string in the row's own colour, or a Text of its own.
+function spanOf(s) {
+  if (typeof s === 'string') return escape(s)
+  const style = `${s.color ? `color:${s.color};` : ''}${s.backgroundColor ? `background:${s.backgroundColor};` : ''}`
+  return style === '' ? escape(s.children) : `<span style="${style}">${escape(s.children)}</span>`
+}
+
+function tick() {
+  const { cols, rows } = sizeOf()
+  if (cols !== world.cols || rows !== world.rows) {
+    resize(world, cols, rows)
+    $('size').textContent = `魚缸 ${cols} 欄 × ${rows} 列（面板 ${state.pane.columns} 欄 × ${state.pane.rows} 列）`
+  }
+  world.wanted = wanted()
+  reconcile(world)
+  step(world, 0.05)
+  step(world, 0.05)
+  const drawn = framed(world, EL)
+  $('tank').innerHTML = drawn.children
+    .map(box => {
+      const row = box.children[0]
+      return `<div class="row"${row.color ? ` style="color:${row.color}"` : ''}>${row.children.map(spanOf).join('')}</div>`
+    })
+    .join('')
+  $('tank').style.width = `${cols * 6.55 + 2}px`
+}
+
+$('copy').addEventListener('click', () => navigator.clipboard?.writeText(JSON.stringify(window.tunerParams, null, 2)))
+$('reset').addEventListener('click', () => {
+  state = structuredClone(DEFAULTS)
+  apply(true)
+})
+$('reseed').addEventListener('click', () => {
+  world = newWorld()
+  world.aspect = ASPECT
+})
+
+apply(false)
+setInterval(tick, 100)
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# Written by Claude Code when it loads the mod: types for the editor and tsc.
+.claude-plugin/types/
+# Built from hooks/tank.ts by tuner/build.mjs.
+tuner/tank.js
+node_modules/
+.DS_Store
+*.log
