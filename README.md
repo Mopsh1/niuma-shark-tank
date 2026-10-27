@@ -88,6 +88,8 @@ Open http://localhost:8766, tune it, and copy the parameters back into `LOOK`.
 
 ## Credits and license
 
+Thanks to drewdi ([@stackedlol](https://github.com/stackedlol)) for [ascii-sharks](https://github.com/stackedlol/ascii-sharks) and for sharing its source: the sharks in this tank would not swim without it. 🦈
+
 The shark shapes, the cell-by-cell rasterization and the shading are adapted from [ascii-sharks](https://github.com/stackedlol/ascii-sharks) by drewdi (MIT). niuma is MIT licensed; see [LICENSE](LICENSE).
 
 ---
@@ -105,4 +107,6 @@ The shark shapes, the cell-by-cell rasterization and the shading are adapted fro
 
 **設定**：兩個選項都有預設值，不設也能用。要改的話輸入 `/plugin configure niuma@niuma-shark-tank`。`summaryLanguage` 設成 `zh-TW`，任務摘要就會用繁體中文；設成 `off` 則完全不呼叫模型。`tankDensity` 用來調整桌面版魚缸的字元密度：右邊被切掉就調低，有空隙就調高。
 
-鯊魚的形狀與繪製方式改寫自 drewdi 的 [ascii-sharks](https://github.com/stackedlol/ascii-sharks)（MIT 授權）。niuma 同樣採用 MIT 授權。
+感謝 drewdi（[@stackedlol](https://github.com/stackedlol)）做出 [ascii-sharks](https://github.com/stackedlol/ascii-sharks) 並公開原始碼，沒有它就沒有這缸鯊魚。🦈
+
+鯊魚的形狀與繪製方式改寫自 drewdi 的 ascii-sharks（MIT 授權）。niuma 同樣採用 MIT 授權。
