@@ -15,6 +15,33 @@
 
 In the pane the sharks are shaded grey blocks under dark glyphs, after [ascii-sharks](https://github.com/stackedlol/ascii-sharks).
 
+## Install
+
+**Easiest: hand it to your agent.** Paste this to Claude Code (or any agent that can run a shell):
+
+> Install the niuma mod from https://github.com/Mopsh1/niuma-shark-tank by following "Install steps for agents" in its README.
+
+### Install steps for agents
+
+Run these in a shell, in order. None of them asks a question.
+
+```sh
+claude plugin marketplace add Mopsh1/niuma-shark-tank
+claude plugin install niuma@niuma-shark-tank
+claude plugin list
+```
+
+- The last command should list `niuma@niuma-shark-tank` as `✔ enabled`. Running the first two again is harmless: they report it is already there.
+- For task summaries in Traditional Chinese, end the install line with `--config summaryLanguage=zh-TW`.
+- Then tell the person to run `/reload-plugins` in their Claude Code session, or start a new one, and to open the pane with `/delegations` or the **Open** button above the prompt.
+- The session that loads the mod must be Claude Code 2.1.308 or later (the desktop app updates itself; in a terminal, `claude update`). An older `claude` command can still run the three lines above: it installs the mod, and a newer session loads it.
+
+### By hand
+
+In a terminal session of Claude Code: `/plugin install niuma --marketplace Mopsh1/niuma-shark-tank`, then answer `y` to add the marketplace and pick a scope. In the desktop app: click **+** next to the prompt box → **Plugins** → **Add marketplace** with `Mopsh1/niuma-shark-tank` → **Add plugin**.
+
+The tank draws on the desktop app and in the terminal; VS Code and the mobile app show the list alone. Codex and Antigravity are optional: without them their sharks just stay idle.
+
 ## What it shows
 
 | Agent | Shark | Tracked when |
@@ -27,18 +54,6 @@ In the pane the sharks are shaded grey blocks under dark glyphs, after [ascii-sh
 - Below the tank: what each agent is doing, for how long, and its working folder. A run whose end never came can be **marked as ended** by hand.
 - A line above the prompt says who is at what and opens the pane. The pane also opens by itself when a task starts, or with `/delegations`.
 - The tank fills the pane, drawing less detail on a very large one so it stays light.
-
-## Install
-
-In a terminal session of Claude Code:
-
-```
-/plugin install niuma --marketplace Mopsh1/niuma-shark-tank
-```
-
-Answer `y` to add the marketplace, then pick a scope. In the desktop app: click **+** next to the prompt box → **Plugins** → **Add marketplace** with `Mopsh1/niuma-shark-tank` → **Add plugin**.
-
-Requires a Claude Code with mods (hooks modules and the `Client` element): tested on 2.1.308; 2.1.278 does not load it. The tank draws on the desktop app and in the terminal; VS Code and the mobile app show the list alone. Codex and Antigravity are optional: without them their sharks just stay idle.
 
 ## Options
 
@@ -86,7 +101,7 @@ The shark shapes, the cell-by-cell rasterization and the shading are adapted fro
 - 魚缸下方列出誰在做什麼、做了多久。卡住的任務可以手動按 **Mark as ended** 結束。
 - 輸入框上方會顯示誰在做什麼，按 **Open** 或輸入 `/delegations` 打開面板；有任務開始時面板也會自動打開。
 
-**安裝**：在 Claude Code 的終端機輸入 `/plugin install niuma --marketplace Mopsh1/niuma-shark-tank`。用桌面版的話，按輸入框旁的 **+** → **Plugins** → **Add marketplace**，輸入 `Mopsh1/niuma-shark-tank`，再按 **Add plugin**。
+**安裝**：最簡單的方式是把這個 repo 的網址貼給 Claude Code，請它照 README 的「Install steps for agents」幫你裝。要自己裝的話，在 Claude Code 的終端機輸入 `/plugin install niuma --marketplace Mopsh1/niuma-shark-tank`；用桌面版則按輸入框旁的 **+** → **Plugins** → **Add marketplace**，輸入 `Mopsh1/niuma-shark-tank`，再按 **Add plugin**。裝好後執行 `/reload-plugins`。載入 mod 的 Claude Code 需要 2.1.308 以上。
 
 **設定**：兩個選項都有預設值，不設也能用。要改的話輸入 `/plugin configure niuma@niuma-shark-tank`。`summaryLanguage` 設成 `zh-TW`，任務摘要就會用繁體中文；設成 `off` 則完全不呼叫模型。`tankDensity` 用來調整桌面版魚缸的字元密度：右邊被切掉就調低，有空隙就調高。
 
