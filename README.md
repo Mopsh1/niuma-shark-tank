@@ -42,7 +42,7 @@ Requires a Claude Code with mods (hooks modules and the `Client` element): teste
 
 ## Options
 
-Set them in `/config`, or in `settings.json` under `pluginConfigs["niuma@niuma-shark-tank"].options`.
+Both have defaults, so nothing needs setting. To change one, run `/plugin configure niuma@niuma-shark-tank`, or give it when installing from a shell: `claude plugin install niuma@niuma-shark-tank --config summaryLanguage=zh-TW`. They are kept in `settings.json` under `pluginConfigs["niuma@niuma-shark-tank"].options`.
 
 | Option | Default | What it does |
 |---|---|---|
@@ -88,6 +88,6 @@ The shark shapes, the cell-by-cell rasterization and the shading are adapted fro
 
 **安裝**：在 Claude Code 的終端機輸入 `/plugin install niuma --marketplace Mopsh1/niuma-shark-tank`。用桌面版的話，按輸入框旁的 **+** → **Plugins** → **Add marketplace**，輸入 `Mopsh1/niuma-shark-tank`，再按 **Add plugin**。
 
-**設定**：`summaryLanguage` 可以設成 `zh-TW`，任務摘要就會用繁體中文；設成 `off` 則完全不呼叫模型。`tankDensity` 用來調整桌面版魚缸的字元密度。
+**設定**：兩個選項都有預設值，不設也能用。要改的話輸入 `/plugin configure niuma@niuma-shark-tank`。`summaryLanguage` 設成 `zh-TW`，任務摘要就會用繁體中文；設成 `off` 則完全不呼叫模型。`tankDensity` 用來調整桌面版魚缸的字元密度：右邊被切掉就調低，有空隙就調高。
 
 鯊魚的形狀與繪製方式改寫自 drewdi 的 [ascii-sharks](https://github.com/stackedlol/ascii-sharks)（MIT 授權）。niuma 同樣採用 MIT 授權。
